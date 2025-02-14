@@ -26,6 +26,7 @@ import {ObjectsKdTree3} from "./collision/ObjectsKdTree3.js";
 import {MarqueeSelectionTool} from "./toolbar/MarqueeSelectionTool.js";
 import {MeasureDistanceTool} from "./toolbar/MeasureDistanceTool.js";
 import {MeasureAngleTool} from "./toolbar/MeasureAngleTool.js";
+import { Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene } from "@xeokit/xeokit-sdk";
 
 
 const hideEdgesMinDrawCount = 5; // FastNavPlugin enables dynamic edges when xeokit's per-frame draw count drops below this
@@ -553,28 +554,55 @@ class BIMViewer extends Controller {
         return this.viewer.localeService;
     }
 
-    // @reviser lijuhong 添加scene、metaScene、camera、cameraFlight、cameraControl等属性
-    //#region
+    /**
+     * Returns the Scene that was configured on this Viewer.
+     *
+     * @return {Scene} The Scene.
+     * @author lijuhong 2025-2-13 添加scene属性。
+     */
     get scene() {
         return this.viewer.scene;
     }
 
+    /**
+     * Returns the MetaScene that was configured on this Viewer.
+     *
+     * @return {MetaScene} The MetaScene.
+     * @author lijuhong 2025-2-13 添加metaScene属性。
+     */
     get metaScene() {
         return this.viewer.metaScene;
     }
 
+    /**
+     * Returns the Camera that was configured on this Viewer.
+     *
+     * @return {Camera} The Camera.
+     * @author lijuhong 2025-2-13 添加camera属性。
+     */
     get camera() {
         return this.viewer.camera;
     }
 
+    /**
+     * Returns the CameraFlightAnimation that was configured on this Viewer.
+     *
+     * @return {CameraFlightAnimation} The CameraFlightAnimation.
+     * @author lijuhong 2025-2-13 添加cameraFlight属性。
+     */
     get cameraFlight() {
         return this.viewer.cameraFlight;
     }
 
+    /**
+     * Returns the CameraControl that was configured on this Viewer.
+     *
+     * @return {CameraControl} The CameraControl.
+     * @author lijuhong 2025-2-13 添加cameraControl属性。
+     */
     get cameraControl() {
         return this.viewer.cameraControl;
     }
-    //#endregion
 
     _customizeViewer() {
 
@@ -1413,14 +1441,25 @@ class BIMViewer extends Controller {
         }
     }
 
-    //@reivser lijuhong 添加setObjectsHighlighted方法
+    /**
+     * Sets whether or not the given objects are highlighted.
+     *
+     * @param {String[]} objectIds IDs of objects.
+     * @param {Boolean} highlighted Whether or not to set the objects highlighted.
+     * @author lijuhong 2025-2-13 添加该方法，用于设置对象是否高亮显示。
+     */
     setObjectsHighlighted(objectIds, highlighted) {
         this._withObjectsInSubtree(objectIds, (entity) => {
             entity.highlighted = highlighted;
         });
     }
 
-    //@reivser lijuhong 添加setAllObjectsHighlighted方法
+    /**
+     * Sets whether or not all objects are highlighted.
+     *
+     * @param {Boolean} highlighted Whether or not to set all objects highlighted.
+     * @author lijuhong 2025-2-13 添加该方法，用于设置所有对象是否高亮显示。
+     */
     setAllObjectsHighlighted(highlighted) {
         if (highlighted) {
             this.viewer.scene.setObjectsHighlighted(this.viewer.scene.objectIds, true);
