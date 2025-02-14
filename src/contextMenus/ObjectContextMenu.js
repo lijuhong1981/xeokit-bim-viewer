@@ -306,6 +306,42 @@ class ObjectContextMenu extends ContextMenu {
                     }
                 }
             ],
+            // @reviser lijuhong 添加highlight相关菜单
+            [
+                {
+                    getTitle: (context) => {
+                        return context.viewer.localeService.translate("objectContextMenu.highlight") || "Highlight";
+                    },
+                    getEnabled: (context) => {
+                        return (!context.entity.highlighted);
+                    },
+                    doAction: (context) => {
+                        context.entity.highlighted = true;
+                    }
+                },
+                {
+                    getTitle: (context) => {
+                        return context.viewer.localeService.translate("objectContextMenu.undoHighlight") || "Undo Highlight";
+                    },
+                    getEnabled: (context) => {
+                        return context.entity.highlighted;
+                    },
+                    doAction: (context) => {
+                        context.entity.highlighted = false;
+                    }
+                },
+                {
+                    getTitle: (context) => {
+                        return context.viewer.localeService.translate("objectContextMenu.highlightNone") || "Highlight None";
+                    },
+                    getEnabled: (context) => {
+                        return (context.viewer.scene.numHighlightedObjects > 0);
+                    },
+                    doAction: (context) => {
+                        context.viewer.scene.setObjectsHighlighted(context.viewer.scene.highlightedObjectIds, false);
+                    }
+                }
+            ],
             [
                 {
                     getTitle: (context) => {

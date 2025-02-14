@@ -116,6 +116,20 @@ class CanvasContextMenu extends ContextMenu {
                         }
                     }
                 ],
+                // @reviser lijuhong 添加highlight相关菜单
+                [
+                    {
+                        getTitle: (context) => {
+                            return context.viewer.localeService.translate("canvasContextMenu.highlightNone") || "Highlight None";
+                        },
+                        getEnabled: (context) => {
+                            return (context.viewer.scene.numHighlightedObjects > 0);
+                        },
+                        doAction: (context) => {
+                            context.viewer.scene.setObjectsHighlighted(context.viewer.scene.highlightedObjectIds, false);
+                        }
+                    }
+                ],
                 [
                     {
                         getTitle: (context) => {

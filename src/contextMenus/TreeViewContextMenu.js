@@ -344,6 +344,43 @@ class TreeViewContextMenu extends ContextMenu {
             }, doAction: function (context) {
                 context.viewer.scene.setObjectsSelected(context.viewer.scene.selectedObjectIds, false);
             }
+        }], 
+        // @reviser lijuhong 添加highlight相关菜单
+        [{
+            getTitle: (context) => {
+                return context.viewer.localeService.translate("treeViewContextMenu.highlight") || "Highlight";
+            }, doAction: function (context) {
+                context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode) => {
+                    if (treeViewNode.objectId) {
+                        const entity = context.viewer.scene.objects[treeViewNode.objectId];
+                        if (entity) {
+                            entity.highlighted = true;
+                            entity.visible = true;
+                        }
+                    }
+                });
+            }
+        }, {
+            getTitle: (context) => {
+                return context.viewer.localeService.translate("treeViewContextMenu.undoHighlight") || "Undo Highlight";
+            }, doAction: function (context) {
+                context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode) => {
+                    if (treeViewNode.objectId) {
+                        const entity = context.viewer.scene.objects[treeViewNode.objectId];
+                        if (entity) {
+                            entity.highlighted = false;
+                        }
+                    }
+                });
+            }
+        }, {
+            getTitle: (context) => {
+                return context.viewer.localeService.translate("treeViewContextMenu.highlightNone") || "Highlight None";
+            }, getEnabled: function (context) {
+                return (context.viewer.scene.numHighlightedObjects > 0);
+            }, doAction: function (context) {
+                context.viewer.scene.setObjectsHighlighted(context.viewer.scene.highlightedObjectIds, false);
+            }
         }], [{
             getTitle: (context) => {
                 return context.viewer.localeService.translate("treeViewContextMenu.clearSlices") || "Clear Slices";
