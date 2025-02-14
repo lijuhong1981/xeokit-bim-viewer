@@ -1792,6 +1792,37 @@ class BIMViewer extends Controller {
     }
 
     /**
+     * Expand the tree view of the specified tab to the specified depth.
+     *
+     * @param {string} tabId ID of the tab to open - see {@link openTab} method description.
+     * @param {number} depth Depth to expand to.
+     * @author lijuhong 2025-2-14 创建
+     */
+    setTabExpandToDepth(tabId, depth) {
+        if (!tabId) {
+            this.error("setTabExpandToDepth() - Argument expected: tabId");
+            return;
+        }
+        switch (tabId) {
+            case "models":
+                this._modelsExplorer.expandTreeViewToDepth(depth);
+                break;
+            case "objects":
+                this._objectsExplorer.expandTreeViewToDepth(depth);
+                break;
+            case "classes":
+                this._classesExplorer.expandTreeViewToDepth(depth);
+                break;
+            case "storeys":
+                this._storeysExplorer.expandTreeViewToDepth(depth);
+                break;
+            default:
+                this.error("setTabExpandToDepth() - tab not recognized: '" + tabId + "'");
+                return;
+        }
+    }
+
+    /**
      * Switches the viewer between 2D and 3D viewing modes.
      *
      * @param {Boolean} enabled Set true to switch into 3D mode, else false to switch into 2D mode.
