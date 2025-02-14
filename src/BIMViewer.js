@@ -553,6 +553,29 @@ class BIMViewer extends Controller {
         return this.viewer.localeService;
     }
 
+    // @reviser lijuhong 添加scene、metaScene、camera、cameraFlight、cameraControl等属性
+    //#region
+    get scene() {
+        return this.viewer.scene;
+    }
+
+    get metaScene() {
+        return this.viewer.metaScene;
+    }
+
+    get camera() {
+        return this.viewer.camera;
+    }
+
+    get cameraFlight() {
+        return this.viewer.cameraFlight;
+    }
+
+    get cameraControl() {
+        return this.viewer.cameraControl;
+    }
+    //#endregion
+
     _customizeViewer() {
 
         const scene = this.viewer.scene;
@@ -1387,6 +1410,22 @@ class BIMViewer extends Controller {
             this.viewer.scene.setObjectsSelected(this.viewer.scene.objectIds, true);
         } else {
             this.viewer.scene.setObjectsSelected(this.viewer.scene.selectedObjectIds, false);
+        }
+    }
+
+    //@reivser lijuhong 添加setObjectsHighlighted方法
+    setObjectsHighlighted(objectIds, highlighted) {
+        this._withObjectsInSubtree(objectIds, (entity) => {
+            entity.highlighted = highlighted;
+        });
+    }
+
+    //@reivser lijuhong 添加setAllObjectsHighlighted方法
+    setAllObjectsHighlighted(highlighted) {
+        if (highlighted) {
+            this.viewer.scene.setObjectsHighlighted(this.viewer.scene.objectIds, true);
+        } else {
+            this.viewer.scene.setObjectsHighlighted(this.viewer.scene.highlightedObjectIds, false);
         }
     }
 
