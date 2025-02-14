@@ -75,6 +75,7 @@ const messages = {
             "xRayAll": "X-Ray All", // Menu option to X-ray all objects
             "xRayNone": "X-Ray None", // Menu option to remove X-ray effect from all objects
             "selectNone": "Select None", // Menu option to clear any currently selected objects
+            "highlightNone": "Highlight None", // Menu option to clear any currently highlighted objects
             "resetView": "Reset View", // Menu option to reset the view to initial state
             "clearSlices": "Clear Slices" // Menu option to delete all section planes created with the Slice tool
         },
@@ -103,6 +104,9 @@ const messages = {
             "select": "Select", // Menu option to select this object
             "undoSelect": "Undo Select", // Menu option to deselect this object
             "selectNone": "Select None", // Menu option to deselect all objects
+            "highlight": "Highlight", // Menu option to highlight this object
+            "undoHighlight": "Undo Highlight", // Menu option to dehighlight this object
+            "highlightNone": "Highlight None", // Menu option to dehighlight all objects
             "clearSlices": "Clear Slices" // Menu option to delete all slices made with the Slicing tool
         },
         "treeViewContextMenu": { // Context menu that appears when we right-click an object node in the tree within in the "Objects" tab
@@ -124,6 +128,9 @@ const messages = {
             "select": "Select", // Menu option to select this object
             "undoSelect": "Undo Select", // Menu option to deselect this object
             "selectNone": "Select None", // Menu option to deselect all objects
+            "highlight": "Highlight", // Menu option to highlight this object
+            "undoHighlight": "Undo Highlight", // Menu option to dehighlight this object
+            "highlightNone": "Highlight None", // Menu option to dehighlight all objects
             "clearSlices": "Clear Slices" // Menu option to delete all slices made with the Slicing tool
         },
         "sectionToolContextMenu": { // Context menu that appears when we right-click an the Slicing tool
