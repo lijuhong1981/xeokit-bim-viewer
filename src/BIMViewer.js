@@ -1,5 +1,5 @@
-// @reviser lijuhong 2025-2-18 导入AnnotationsPlugin、Annotation
-import {BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, AnnotationsPlugin, Annotation} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reviser lijuhong 2025-2-18 导入AnnotationsPlugin
+import {BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, AnnotationsPlugin} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 
 import {Controller} from "./Controller.js";
 import {BusyModal} from "./BusyModal.js";
@@ -27,7 +27,8 @@ import {ObjectsKdTree3} from "./collision/ObjectsKdTree3.js";
 import {MarqueeSelectionTool} from "./toolbar/MarqueeSelectionTool.js";
 import {MeasureDistanceTool} from "./toolbar/MeasureDistanceTool.js";
 import {MeasureAngleTool} from "./toolbar/MeasureAngleTool.js";
-import { Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene } from "@xeokit/xeokit-sdk";
+// @reviser lijuhong 2025-2-18 导入Annotation
+import { Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene, Annotation } from "@xeokit/xeokit-sdk";
 
 
 const hideEdgesMinDrawCount = 5; // FastNavPlugin enables dynamic edges when xeokit's per-frame draw count drops below this
