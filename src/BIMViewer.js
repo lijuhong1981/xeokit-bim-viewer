@@ -1864,9 +1864,6 @@ class BIMViewer extends Controller {
             return;
         }
         switch (tabId) {
-            case "models":
-                this._modelsExplorer.expandTreeViewToDepth(depth);
-                break;
             case "objects":
                 this._objectsExplorer.expandTreeViewToDepth(depth);
                 break;
