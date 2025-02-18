@@ -1,4 +1,5 @@
-import {BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer,} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reviser lijuhong 2025-2-18 导入AnnotationsPlugin、Annotation
+import {BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, AnnotationsPlugin, Annotation} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 
 import {Controller} from "./Controller.js";
 import {BusyModal} from "./BusyModal.js";
@@ -171,6 +172,33 @@ function initTabs(containerElement) {
             })
         }
     }
+}
+
+/**
+ * Destroys an Annotation.
+ * 
+ * @param {string} id
+ * @param {AnnotationsPlugin} annotations
+ * @param {Array<Annotation>} clickShowLabelAnnotations
+ * @param {Array<Annotation>} hoverShowLabelAnnotations
+ * @author lijuhong 2025-2-18 创建该方法，用于销毁Annotation对象
+ */
+function destroyAnnotation(id, annotations, clickShowLabelAnnotations, hoverShowLabelAnnotations) {
+    for (let i = 0; i < clickShowLabelAnnotations.length; i++) {
+        const element = clickShowLabelAnnotations[i];
+        if (element.id === id) {
+            clickShowLabelAnnotations.splice(i, 1);
+            break;
+        }
+    }
+    for (let i = 0; i < hoverShowLabelAnnotations.length; i++) {
+        const element = hoverShowLabelAnnotations[i];
+        if (element.id === id) {
+            hoverShowLabelAnnotations.splice(i, 1);
+            break;
+        }
+    }
+    annotations.destroyAnnotation(id);
 }
 
 
@@ -533,6 +561,37 @@ class BIMViewer extends Controller {
             hideTransparentObjects: false,
             scaleCanvasResolution: false,
             scaleCanvasResolutionFactor: 0.6
+        });
+
+        // @reviser lijuhong 2025-2-18 初始化AnnotationsPlugin对象及相关变量。
+        const annotationsCfg = cfg.annotations || {};
+        this._annotations = new AnnotationsPlugin(viewer, {
+            markerHTML: annotationsCfg.markerHTML || "<div class='xeokit-annotation-marker' style='background-color: {{markerBGColor}};'>{{glyph}}</div>",
+            labelHTML: annotationsCfg.labelHTML || "<div class='xeokit-annotation-label' style='background-color: {{labelBGColor}};'>\
+                <div class='xeokit-annotation-title'>{{title}}</div>\
+                <div class='xeokit-annotation-desc'>{{description}}</div>\
+                </div>",    
+            values: annotationsCfg.values || {
+                markerBGColor: "red",
+                labelBGColor: "white",
+                glyph: "X",
+                title: "Untitled",
+                description: "No description"
+            }
+        });
+        this._clickShowLabelAnnotations = [];
+        this._hoverShowLabelAnnotations = [];
+        this._annotations.on("markerClicked", (annotation) => {
+            if (this._clickShowLabelAnnotations.indexOf(annotation) > -1)
+                annotation.setLabelShown(!annotation.getLabelShown());
+        });
+        this._annotations.on("markerMouseEnter", (annotation) => {
+            if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
+                annotation.setLabelShown(true);
+        });    
+        this._annotations.on("markerMouseLeave", (annotation) => {
+            if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
+                annotation.setLabelShown(false);
         });
 
         // this.viewer.scene.on("rendered", () => {
@@ -1796,7 +1855,7 @@ class BIMViewer extends Controller {
      *
      * @param {string} tabId ID of the tab to open - see {@link openTab} method description.
      * @param {number} depth Depth to expand to.
-     * @author lijuhong 2025-2-14 创建
+     * @author lijuhong 2025-2-14 添加该方法，用于设置tab标签的展开深度。
      */
     setTabExpandToDepth(tabId, depth) {
         if (!tabId) {
@@ -2221,6 +2280,44 @@ class BIMViewer extends Controller {
     }
 
     /**
+     * Creates an Annotation.
+     * 
+     * @param {object} params Annotation configuration.
+     * @param {string} params.labelShownMode Annotation label shown mode
+     * 
+     * The available values are: 
+     * * "always" - Always shown.
+     * * "clickShown" - Click on the marker to shown.
+     * * "hoverShown" - Hover on the marker to shown.
+     * * "never" - Never shown.
+     * @returns {Annotation} The new Annotation.
+     * @author lijuhong 2025-02-18 添加该方法，用于创建Annotation对象。
+     */
+    createAnnotation(params) {
+        params.labelShown = params.labelShownMode === 'always' ? true : false;
+        const annotation = this._annotations.createAnnotation(params);
+        switch (params.labelShownMode) {
+            case 'clickShown':
+                this._clickShowLabelAnnotations.push(annotation);
+                break;
+            case 'hoverShown':
+                this._hoverShowLabelAnnotations.push(annotation);
+                break;
+        }
+        return annotation;
+    }
+
+    /**
+     * Destroys an Annotation.
+     * 
+     * @param {string} id ID of Annotation to destroy.
+     * @author lijuhong 2025-02-18 添加该方法，用于销毁Annotation对象。
+     */
+    destroyAnnotation(id) {
+        destroyAnnotation(id, this._annotations, this._clickShowLabelAnnotations, this._hoverShowLabelAnnotations);
+    }
+
+    /**
      * Destroys the viewer, freeing all resources.
      */
     destroy() {
@@ -2228,6 +2325,8 @@ class BIMViewer extends Controller {
         this._bcfViewpointsPlugin.destroy();
         this._canvasContextMenu.destroy();
         this._objectContextMenu.destroy();
+        // @reviser lijuhong 2025-2-18 添加annotations对象销毁方法
+        this._annotations.destroy();
     }
 }
 
