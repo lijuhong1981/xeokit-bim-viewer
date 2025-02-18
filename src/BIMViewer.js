@@ -176,15 +176,14 @@ function initTabs(containerElement) {
 }
 
 /**
- * Destroys an Annotation.
+ * Remove an Annotation from Array
  * 
  * @param {string} id
- * @param {AnnotationsPlugin} annotations
  * @param {Array<Annotation>} clickShowLabelAnnotations
  * @param {Array<Annotation>} hoverShowLabelAnnotations
- * @author lijuhong 2025-2-18 创建该方法，用于销毁Annotation对象
+ * @author lijuhong 2025-2-18 创建该方法，用于从数组中移除Annotation对象
  */
-function destroyAnnotation(id, annotations, clickShowLabelAnnotations, hoverShowLabelAnnotations) {
+function removeAnnotation(id, clickShowLabelAnnotations, hoverShowLabelAnnotations) {
     for (let i = 0; i < clickShowLabelAnnotations.length; i++) {
         const element = clickShowLabelAnnotations[i];
         if (element.id === id) {
@@ -199,7 +198,6 @@ function destroyAnnotation(id, annotations, clickShowLabelAnnotations, hoverShow
             break;
         }
     }
-    annotations.destroyAnnotation(id);
 }
 
 
@@ -566,7 +564,7 @@ class BIMViewer extends Controller {
 
         // @reviser lijuhong 2025-2-18 初始化AnnotationsPlugin对象及相关变量。
         const annotationsCfg = cfg.annotations || {};
-        this._annotations = new AnnotationsPlugin(viewer, {
+        this._annotationsPlugin = new AnnotationsPlugin(viewer, {
             markerHTML: annotationsCfg.markerHTML || "<div class='xeokit-annotation-marker' style='background-color: {{markerBGColor}};'>{{glyph}}</div>",
             labelHTML: annotationsCfg.labelHTML || "<div class='xeokit-annotation-label' style='background-color: {{labelBGColor}};'>\
                 <div class='xeokit-annotation-title'>{{title}}</div>\
@@ -582,17 +580,20 @@ class BIMViewer extends Controller {
         });
         this._clickShowLabelAnnotations = [];
         this._hoverShowLabelAnnotations = [];
-        this._annotations.on("markerClicked", (annotation) => {
+        this._annotationsPlugin.on("markerClicked", (annotation) => {
             if (this._clickShowLabelAnnotations.indexOf(annotation) > -1)
                 annotation.setLabelShown(!annotation.getLabelShown());
         });
-        this._annotations.on("markerMouseEnter", (annotation) => {
+        this._annotationsPlugin.on("markerMouseEnter", (annotation) => {
             if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
                 annotation.setLabelShown(true);
         });    
-        this._annotations.on("markerMouseLeave", (annotation) => {
+        this._annotationsPlugin.on("markerMouseLeave", (annotation) => {
             if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
                 annotation.setLabelShown(false);
+        });
+        this._annotationsPlugin.on("annotationDestroyed", (id) => {
+            removeAnnotation(id, this._clickShowLabelAnnotations, this._hoverShowLabelAnnotations);
         });
 
         // this.viewer.scene.on("rendered", () => {
@@ -2293,7 +2294,7 @@ class BIMViewer extends Controller {
      */
     createAnnotation(params) {
         params.labelShown = params.labelShownMode === 'always' ? true : false;
-        const annotation = this._annotations.createAnnotation(params);
+        const annotation = this._annotationsPlugin.createAnnotation(params);
         switch (params.labelShownMode) {
             case 'clickShown':
                 this._clickShowLabelAnnotations.push(annotation);
@@ -2312,7 +2313,7 @@ class BIMViewer extends Controller {
      * @author lijuhong 2025-02-18 添加该方法，用于销毁Annotation对象。
      */
     destroyAnnotation(id) {
-        destroyAnnotation(id, this._annotations, this._clickShowLabelAnnotations, this._hoverShowLabelAnnotations);
+        this._annotationsPlugin.destroyAnnotation(id);
     }
 
     /**
@@ -2324,7 +2325,7 @@ class BIMViewer extends Controller {
         this._canvasContextMenu.destroy();
         this._objectContextMenu.destroy();
         // @reviser lijuhong 2025-2-18 添加annotations对象销毁方法
-        this._annotations.destroy();
+        this._annotationsPlugin.destroy();
     }
 }
 
