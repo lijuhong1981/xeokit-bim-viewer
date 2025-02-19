@@ -1,5 +1,6 @@
 import {Controller} from "../Controller.js";
-import {AngleMeasurementsPlugin, AngleMeasurementsMouseControl, ContextMenu} from "@xeokit/xeokit-sdk";
+// @reviser lijuhong 2025-2-19 修改 xeokit-sdk 导入路径
+import {AngleMeasurementsPlugin, AngleMeasurementsMouseControl, ContextMenu} from "../../xeokit-sdk/dist/xeokit-sdk.es.js";
 
 /** @private */
 export class MeasureAngleTool extends Controller {

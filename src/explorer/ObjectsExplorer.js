@@ -1,4 +1,5 @@
-import {TreeViewPlugin} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reviser lijuhong 2025-2-19 修改 xeokit-sdk 导入路径
+import {TreeViewPlugin} from "../../xeokit-sdk/dist/xeokit-sdk.es.js";
 import {TreeViewContextMenu} from "../contextMenus/TreeViewContextMenu.js";
 import {Controller} from "../Controller.js";
 

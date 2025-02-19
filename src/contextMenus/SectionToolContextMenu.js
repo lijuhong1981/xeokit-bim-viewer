@@ -1,4 +1,5 @@
-import {ContextMenu, math, utils} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reviser lijuhong 2025-2-19 修改 xeokit-sdk 导入路径
+import {ContextMenu, math, utils} from "../../xeokit-sdk/dist/xeokit-sdk.es.js";
 
 const tempAABB = math.AABB3();
 const tempVec3 = math.vec3();

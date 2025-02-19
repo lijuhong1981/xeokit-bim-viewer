@@ -1,34 +1,34 @@
-// @reviser lijuhong 2025-2-18 导入AnnotationsPlugin, Texture, EdgeMaterial, EmphasisMaterial, LambertMaterial, MetallicMaterial, PhongMaterial, SpecularMaterial, ReadableGeometry, VBOGeometry, buildBoxGeometry, buildBoxLinesGeometry, buildBoxLinesGeometryFromAABB, buildCylinderGeometry, buildGridGeometry, buildLineGeometry, buildPlaneGeometry, buildPolylineGeometry, buildPolylineGeometryFromCurve, buildSphereGeometry, buildTorusGeometry, buildVectorTextGeometry
-import {BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, AnnotationsPlugin, Texture, EdgeMaterial, EmphasisMaterial, LambertMaterial, MetallicMaterial, PhongMaterial, SpecularMaterial, ReadableGeometry, VBOGeometry, buildBoxGeometry, buildBoxLinesGeometry, buildBoxLinesGeometryFromAABB, buildCylinderGeometry, buildGridGeometry, buildLineGeometry, buildPlaneGeometry, buildPolylineGeometry, buildPolylineGeometryFromCurve, buildSphereGeometry, buildTorusGeometry, buildVectorTextGeometry} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reviser lijuhong 修改 xeokit-sdk 导入路径，并添加导入对象。
+import { BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene, Annotation, AnnotationsPlugin, Texture, Material, EdgeMaterial, EmphasisMaterial, LambertMaterial, MetallicMaterial, PhongMaterial, SpecularMaterial, Geometry, ReadableGeometry, VBOGeometry, buildBoxGeometry, buildBoxLinesGeometry, buildBoxLinesGeometryFromAABB, buildCylinderGeometry, buildGridGeometry, buildLineGeometry, buildPlaneGeometry, buildPolylineGeometry, buildPolylineGeometryFromCurve, buildSphereGeometry, buildTorusGeometry, buildVectorTextGeometry, Mesh } from "../xeokit-sdk/dist/xeokit-sdk.es.js";
 
-import {Controller} from "./Controller.js";
-import {BusyModal} from "./BusyModal.js";
-import {ResetAction} from "./toolbar/ResetAction.js";
-import {FitAction} from "./toolbar/FitAction.js";
-import {FirstPersonMode} from "./toolbar/FirstPersonMode.js";
-import {HideTool} from "./toolbar/HideTool.js";
-import {SelectionTool} from "./toolbar/SelectionTool.js";
-import {ShowSpacesMode} from "./toolbar/ShowSpacesMode.js";
-import {QueryTool} from "./toolbar/QueryTool.js";
-import {SectionTool} from "./toolbar/SectionTool.js";
-import {NavCubeMode} from "./toolbar/NavCubeMode.js";
+import { Controller } from "./Controller.js";
+import { BusyModal } from "./BusyModal.js";
+import { ResetAction } from "./toolbar/ResetAction.js";
+import { FitAction } from "./toolbar/FitAction.js";
+import { FirstPersonMode } from "./toolbar/FirstPersonMode.js";
+import { HideTool } from "./toolbar/HideTool.js";
+import { SelectionTool } from "./toolbar/SelectionTool.js";
+import { ShowSpacesMode } from "./toolbar/ShowSpacesMode.js";
+import { QueryTool } from "./toolbar/QueryTool.js";
+import { SectionTool } from "./toolbar/SectionTool.js";
+import { NavCubeMode } from "./toolbar/NavCubeMode.js";
 
-import {ModelsExplorer} from "./explorer/ModelsExplorer.js";
-import {ObjectsExplorer} from "./explorer/ObjectsExplorer.js";
-import {ClassesExplorer} from "./explorer/ClassesExplorer.js";
-import {StoreysExplorer} from "./explorer/StoreysExplorer.js";
+import { ModelsExplorer } from "./explorer/ModelsExplorer.js";
+import { ObjectsExplorer } from "./explorer/ObjectsExplorer.js";
+import { ClassesExplorer } from "./explorer/ClassesExplorer.js";
+import { StoreysExplorer } from "./explorer/StoreysExplorer.js";
 
-import {ThreeDMode} from "./toolbar/ThreeDMode.js";
-import {ObjectContextMenu} from "./contextMenus/ObjectContextMenu.js";
-import {CanvasContextMenu} from "./contextMenus/CanvasContextMenu.js";
-import {OrthoMode} from "./toolbar/OrthoMode.js";
-import {PropertiesInspector} from "./inspector/PropertiesInspector.js";
-import {ObjectsKdTree3} from "./collision/ObjectsKdTree3.js";
-import {MarqueeSelectionTool} from "./toolbar/MarqueeSelectionTool.js";
-import {MeasureDistanceTool} from "./toolbar/MeasureDistanceTool.js";
-import {MeasureAngleTool} from "./toolbar/MeasureAngleTool.js";
-// @reviser lijuhong 2025-2-18 导入Annotation, Material
-import { Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene, Annotation, Material } from "@xeokit/xeokit-sdk";
+import { ThreeDMode } from "./toolbar/ThreeDMode.js";
+import { ObjectContextMenu } from "./contextMenus/ObjectContextMenu.js";
+import { CanvasContextMenu } from "./contextMenus/CanvasContextMenu.js";
+import { OrthoMode } from "./toolbar/OrthoMode.js";
+import { PropertiesInspector } from "./inspector/PropertiesInspector.js";
+import { ObjectsKdTree3 } from "./collision/ObjectsKdTree3.js";
+import { MarqueeSelectionTool } from "./toolbar/MarqueeSelectionTool.js";
+import { MeasureDistanceTool } from "./toolbar/MeasureDistanceTool.js";
+import { MeasureAngleTool } from "./toolbar/MeasureAngleTool.js";
+// @reviser lijuhong 注释掉从@xeokit/xeokit-sdk导入的对象。
+// import { Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene } from "@xeokit/xeokit-sdk";
 
 
 const hideEdgesMinDrawCount = 5; // FastNavPlugin enables dynamic edges when xeokit's per-frame draw count drops below this
@@ -201,6 +201,20 @@ function removeAnnotation(id, clickShowLabelAnnotations, hoverShowLabelAnnotatio
 }
 
 /**
+ * Creates a texture.
+ * 
+ * @param {Scene} scene 
+ * @param {object} cfg
+ * @returns {Texture}
+ * @author lijuhong 2025-02-18 创建该方法，用于构建纹理对象。
+ */
+function buildTexture(scene, cfg) {
+    if (cfg instanceof Texture)
+        return cfg;
+    return new Texture(scene, cfg);
+}
+
+/**
  * Create a geometry.
  * 
  * @param {Scene} scene
@@ -220,11 +234,13 @@ function removeAnnotation(id, clickShowLabelAnnotations, hoverShowLabelAnnotatio
  * * "vectorText" - Create a vector text geometry.
  * * "readable" - Create a Readable geometry.
  * * "vbo" - Create a VBO geometry.
- * @returns {ReadableGeometry|VBOGeometry}
+ * @returns {Geometry}
  * @author lijuhong 2025-2-18 创建该方法，用于构建几何体对象。
  */
 function buildGeometry(scene, cfg) {
-    switch  (cfg.type.toLowerCase()) {
+    if (cfg instanceof Geometry)
+        return cfg;
+    switch (cfg.type.toLowerCase()) {
         case 'box':
             return new ReadableGeometry(scene, buildBoxGeometry(cfg));
         case 'boxLines':
@@ -251,12 +267,11 @@ function buildGeometry(scene, cfg) {
             return new ReadableGeometry(scene, buildTorusGeometry(cfg));
         case 'vectorText':
             return new ReadableGeometry(scene, buildVectorTextGeometry(cfg));
-        case 'readable':
-            return new ReadableGeometry(scene, cfg);
         case 'vbo':
             return new VBOGeometry(scene, cfg);
+        case 'readable':
         default:
-            throw "Unknown geometry type: " + cfg.type;
+            return new ReadableGeometry(scene, cfg);
     }
 }
 
@@ -278,7 +293,9 @@ function buildGeometry(scene, cfg) {
  * @author lijuhong 2025-2-18 创建该方法，用于构建材质对象。
  */
 function buildMaterial(scene, cfg) {
-    switch  (cfg.type.toLowerCase()) {
+    if (cfg instanceof Material)
+        return cfg;
+    switch (cfg.type.toLowerCase()) {
         case 'edge':
             return new EdgeMaterial(scene, cfg);
         case 'emphasis':
@@ -287,13 +304,62 @@ function buildMaterial(scene, cfg) {
             return new LambertMaterial(scene, cfg);
         case 'metallic':
             return new MetallicMaterial(scene, cfg);
-        case 'phong':
-            return new PhongMaterial(scene, cfg);
         case 'specular':
             return new SpecularMaterial(scene, cfg);
+        case 'phong':
         default:
-            throw "Unknown material type: " + cfg.type;
+            return new PhongMaterial(scene, cfg);
     }
+}
+
+/**
+ * Create an emphasis material.
+ * 
+ * @param {Scene} scene
+ * @param {object} cfg
+ * @returns {EmphasisMaterial}
+ * @author lijuhong 2025-2-19 创建该方法，用于构建EmphasisMaterial对象。
+ */
+function buildEmphasisMaterial(scene, cfg) {
+    if (cfg instanceof EmphasisMaterial)
+        return cfg;
+    return new EmphasisMaterial(scene, cfg);
+}
+
+/**
+ * Create an edge material.
+ * 
+ * @param {Scene} scene
+ * @param {object} cfg
+ * @returns {EmphasisMaterial}
+ * @author lijuhong 2025-2-19 创建该方法，用于构建EdgeMaterial对象。
+ */
+function buildEdgeMaterial(scene, cfg) {
+    if (cfg instanceof EdgeMaterial)
+        return cfg;
+    return new EdgeMaterial(scene, cfg);
+}
+
+/**
+ * Create a mesh.
+ * 
+ * @param {Scene} scene
+ * @param {object} cfg
+ * @returns {Mesh}
+ * @author lijuhong 2025-2-19 创建该方法，用于构建Mesh对象。
+ */
+function buildMesh(scene, cfg) {
+    cfg.geometry = buildGeometry(scene, cfg.geometry);
+    cfg.material = buildMaterial(scene, cfg.material);
+    if (cfg.xrayMaterial)
+        cfg.xrayMaterial = buildEmphasisMaterial(scene, cfg.xrayMaterial);
+    if (cfg.highlightMaterial)
+        cfg.highlightMaterial = buildEmphasisMaterial(scene, cfg.highlightMaterial);
+    if (cfg.selectedMaterial)
+        cfg.selectedMaterial = buildEmphasisMaterial(scene, cfg.selectedMaterial);
+    if (cfg.edgeMaterial)
+        cfg.edgeMaterial = buildEdgeMaterial(scene, cfg.edgeMaterial);
+    return new Mesh(scene, cfg);
 }
 
 
@@ -395,7 +461,7 @@ class BIMViewer extends Controller {
         this._initCanvasContextMenus();
 
         explorerElement.innerHTML = createExplorerTemplate(cfg);
-        toolbarElement.innerHTML = createToolbarTemplate({enableMeasurements: this._enableMeasurements});
+        toolbarElement.innerHTML = createToolbarTemplate({ enableMeasurements: this._enableMeasurements });
         if (this._enablePropertiesInspector) {
             inspectorElement.innerHTML = createInspectorTemplate();
         }
@@ -589,7 +655,7 @@ class BIMViewer extends Controller {
             this._marqueeSelectionTool,
             this._sectionTool,
             this._enableMeasurements ? this._measureDistanceTool : null,
-            this._enableMeasurements ? this._measureAngleTool: null
+            this._enableMeasurements ? this._measureAngleTool : null
         ]);
 
         explorerElement.querySelector(".xeokit-showAllObjects").addEventListener("click", (event) => {
@@ -665,7 +731,7 @@ class BIMViewer extends Controller {
             labelHTML: annotationsCfg.labelHTML || "<div class='xeokit-annotation-label' style='background-color: {{labelBGColor}};'>\
                 <div class='xeokit-annotation-title'>{{title}}</div>\
                 <div class='xeokit-annotation-desc'>{{description}}</div>\
-                </div>",    
+                </div>",
             values: annotationsCfg.values || {
                 markerBGColor: "red",
                 labelBGColor: "white",
@@ -683,7 +749,7 @@ class BIMViewer extends Controller {
         this._annotationsPlugin.on("markerMouseEnter", (annotation) => {
             if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
                 annotation.setLabelShown(true);
-        });    
+        });
         this._annotationsPlugin.on("markerMouseLeave", (annotation) => {
             if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
                 annotation.setLabelShown(false);
@@ -2375,7 +2441,7 @@ class BIMViewer extends Controller {
     }
 
     /**
-     * Creates an Annotation.
+     * Creates an Annotation to the scene.
      * 
      * @param {object} params Annotation configuration.
      * @param {string} params.labelShownMode Annotation label shown mode
@@ -2413,65 +2479,24 @@ class BIMViewer extends Controller {
     }
 
     /**
-     * Creates a texture.
+     * Add a mesh to the scene.
      * 
      * @param {object} cfg
-     * @returns {Texture}
-     * @author lijuhong 2025-02-18 创建该方法，用于构建纹理对象。
+     * @returns {Mesh}
+     * @author lijuhong 2025-02-19 添加该方法，用于添加Mesh对象到场景中。
      */
-    buildTexture(cfg) {
-        return new Texture(this.scene, cfg);
+    addMesh(cfg) {
+        return buildMesh(this.scene, cfg);
     }
 
     /**
-     * Create a geometry.
+     * Removes a mesh from the scene.
      * 
-     * @param {object} cfg
-     * @param {string} cfg.type
-     * 
-     * The available values are: 
-     * * "box" - Create a box geometry.
-     * * "boxLines" - Create a box lines geometry.
-     * * "cylinder" - Create a cylinder geometry.
-     * * "grid" - Create a grid geometry.
-     * * "line" - Create a line geometry.
-     * * "plane" - Create a plane geometry.
-     * * "polyline" - Create a polyline geometry.
-     * * "sphere" - Create a sphere geometry.
-     * * "torus" - Create a torus geometry.
-     * * "vectorText" - Create a vector text geometry.
-     * * "readable" - Create a Readable geometry.
-     * * "vbo" - Create a VBO geometry.
-     * @returns {ReadableGeometry|VBOGeometry}
-     * @author lijuhong 2025-2-18 创建该方法，用于构建几何体对象。
-     */
-    buildGeometry(cfg) {
-        return buildGeometry(this.scene, cfg);
-    }
-
-    /**
-     * Create a material.
-     * 
-     * @param {Scene} scene
-     * @param {object} cfg
-     * @param {string} cfg.type
-     * 
-     * The available values are: 
-     * * "edge" - Create an edge material.
-     * * "emphasis" - Create an emphasis material.
-     * * "lambert" - Create a lambert material.
-     * * "metallic" - Create a metallic material.
-     * * "phong" - Create a phong material.
-     * * "specular" - Create a specular material.
-     * @returns {Material}
-     * @author lijuhong 2025-2-18 创建该方法，用于构建材质对象。
+     * @param {Mesh} mesh The mesh to remove.
+     * @author lijuhong 2025-02-19 添加该方法，用于从场景中移除Mesh对象。
     */
-    buildMaterial(cfg) {
-        return buildMaterial(this.scene, cfg);
-    }
-
-    addMesh(geometryCfg, materialCfg) {
-
+    removeMesh(mesh) {
+        mesh.destroy();
     }
 
     /**
@@ -2487,4 +2512,5 @@ class BIMViewer extends Controller {
     }
 }
 
-export {BIMViewer};
+// @reviser lijuhong 添加buildTexture, buildGeometry, buildMaterial, buildEmphasisMaterial, buildEdgeMaterial, buildMesh导出方法
+export { BIMViewer, buildTexture, buildGeometry, buildMaterial, buildEmphasisMaterial, buildEdgeMaterial, buildMesh };

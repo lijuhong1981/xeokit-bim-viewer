@@ -1,10 +1,10 @@
-import {Server} from "./src/server/Server.js";
-import {BIMViewer} from "./src/BIMViewer.js";
-// @reivser lijuhong 2025-2-18 添加导出math库
-import {LocaleService, math} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reivser lijuhong 2025-2-18 修改导出方式，直接导出全部组件
+export * from "./src/server/Server.js";
+export * from "./src/BIMViewer.js";
+// @reviser lijuhong 2025-2-19 修改 xeokit-sdk 导入路径
+export * from "./xeokit-sdk/dist/xeokit-sdk.es.js";
 
-export {BIMViewer};
-export {Server};
-// @reivser lijuhong 2025-2-18 添加导出math库
-export {LocaleService, math};
+// export {BIMViewer};
+// export {Server};
+// export {LocaleService};
 

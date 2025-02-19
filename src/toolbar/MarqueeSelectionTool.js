@@ -1,5 +1,6 @@
 import {Controller} from "../Controller.js";
-import {Frustum, frustumIntersectsAABB3, math, setFrustum} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reviser lijuhong 2025-2-19 修改 xeokit-sdk 导入路径
+import {Frustum, frustumIntersectsAABB3, math, setFrustum} from "../../xeokit-sdk/dist/xeokit-sdk.es.js";
 
 const LEFT_TO_RIGHT = 0;
 const RIGHT_TO_LEFT = 1;
