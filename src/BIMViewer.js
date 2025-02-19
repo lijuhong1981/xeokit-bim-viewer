@@ -240,7 +240,7 @@ function buildTexture(scene, cfg) {
 function buildGeometry(scene, cfg) {
     if (cfg instanceof Geometry)
         return cfg;
-    switch (cfg.type.toLowerCase()) {
+    switch (cfg.type) {
         case 'box':
             return new ReadableGeometry(scene, buildBoxGeometry(cfg));
         case 'boxLines':
@@ -295,7 +295,7 @@ function buildGeometry(scene, cfg) {
 function buildMaterial(scene, cfg) {
     if (cfg instanceof Material)
         return cfg;
-    switch (cfg.type.toLowerCase()) {
+    switch (cfg.type) {
         case 'edge':
             return new EdgeMaterial(scene, cfg);
         case 'emphasis':
@@ -2476,6 +2476,85 @@ class BIMViewer extends Controller {
      */
     destroyAnnotation(id) {
         this._annotationsPlugin.destroyAnnotation(id);
+    }
+
+    /**
+     * Creates a texture.
+     * 
+     * @param {object} cfg
+     * @returns {Texture}
+     * @author lijuhong 2025-02-18 创建该方法，用于构建纹理对象。
+     */
+    buildTexture(cfg) {
+        return buildTexture(this.scene, cfg);
+    }
+
+    /**
+     * Create a geometry.
+     * 
+     * @param {object} cfg
+     * @param {string} cfg.type
+     * 
+     * The available values are: 
+     * * "box" - Create a box geometry.
+     * * "boxLines" - Create a box lines geometry.
+     * * "cylinder" - Create a cylinder geometry.
+     * * "grid" - Create a grid geometry.
+     * * "line" - Create a line geometry.
+     * * "plane" - Create a plane geometry.
+     * * "polyline" - Create a polyline geometry.
+     * * "sphere" - Create a sphere geometry.
+     * * "torus" - Create a torus geometry.
+     * * "vectorText" - Create a vector text geometry.
+     * * "readable" - Create a Readable geometry.
+     * * "vbo" - Create a VBO geometry.
+     * @returns {Geometry}
+     * @author lijuhong 2025-2-18 创建该方法，用于构建几何体对象。
+     */
+    buildGeometry(cfg) {
+        return buildGeometry(this.scene, cfg);
+    }
+
+    /**
+     * Create an material.
+     * 
+     * @param {object} cfg
+     * @param {string} cfg.type
+     * 
+     * The available values are: 
+     * * "edge" - Create an edge material.
+     * * "emphasis" - Create an emphasis material.
+     * * "lambert" - Create a lambert material.
+     * * "metallic" - Create a metallic material.
+     * * "phong" - Create a phong material.
+     * * "specular" - Create a specular material.
+     * @returns {Material}
+     * @author lijuhong 2025-2-18 创建该方法，用于构建材质对象。
+     */
+    buildMaterial(cfg) {
+        return buildMaterial(this.scene, cfg);
+    }
+
+    /**
+     * Create an emphasis material.
+     * 
+     * @param {object} cfg
+     * @returns {EmphasisMaterial}
+     * @author lijuhong 2025-2-19 创建该方法，用于构建EmphasisMaterial对象。
+     */
+    buildEmphasisMaterial(cfg) {
+        return buildEmphasisMaterial(this.scene, cfg);
+    }
+
+    /**
+     * Create an edge material.
+     * 
+     * @param {object} cfg
+     * @returns {EmphasisMaterial}
+     * @author lijuhong 2025-2-19 创建该方法，用于构建EdgeMaterial对象。
+     */
+    buildEdgeMaterial(cfg) {
+        return buildEdgeMaterial(this.scene, cfg);
     }
 
     /**
