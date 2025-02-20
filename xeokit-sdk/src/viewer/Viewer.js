@@ -6,6 +6,8 @@ import {LocaleService} from "./localization/LocaleService.js";
 import html2canvas from 'html2canvas/dist/html2canvas.esm.js';
 import {math} from "./scene/math/math.js";
 import {transformToNode} from "../plugins/lib/ui/index.js";
+// @reviser lijuhong 添加导入对象
+import {AnnotationsPlugin} from "../plugins/AnnotationsPlugin/AnnotationsPlugin.js";
 
 /**
  * The 3D Viewer at the heart of the xeokit SDK.
@@ -545,6 +547,17 @@ class Viewer {
         this.scene._renderer.endSnapshot();
         this.scene._renderer.render({force: true});
         this._snapshotBegun = false;
+    }
+
+    /**
+     * Creates an annotation plugin to the Viewer.
+     * 
+     * @param {object} cfg {@link AnnotationsPlugin#cfg}
+     * @returns {AnnotationsPlugin}
+     * @author lijuhong 2025-02-20 创建该方法，用于构建AnnotationsPlugin对象。
+     */
+    createAnnotationsPlugin(cfg = {}) {
+        return new AnnotationsPlugin(this, cfg);
     }
 
     /** Destroys this Viewer.

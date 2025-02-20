@@ -19,6 +19,13 @@ import {SAO} from "../postfx/SAO.js";
 import {CrossSections} from "../postfx/CrossSections.js";
 import {PointsMaterial} from "../materials/PointsMaterial.js";
 import {LinesMaterial} from "../materials/LinesMaterial.js";
+// @reviser lijuhong 2025-2-20 添加导入对象
+import {buildTexture} from "../builders/buildTexture.js";
+import {buildMaterial, buildEmphasisMaterial, buildEdgeMaterial} from "../builders/buildMaterial.js";
+import {buildGeometry} from "../builders/buildGeometry.js";
+import {buildMesh} from "../builders/buildMesh.js";
+import {SpriteMarker} from "../marker/SpriteMarker.js";
+import {Node} from "../nodes/Node.js";
 
 // Enables runtime check for redundant calls to object state update methods, eg. Scene#_objectVisibilityUpdated
 const ASSERT_OBJECT_STATE_UPDATE = false;
@@ -2781,6 +2788,96 @@ class Scene extends Component {
         this._tickifiedFunctions[cbString] = {tickSubId, wrapperFunc};
 
         return wrapperFunc;
+    }
+
+    /**
+     * Creates a texture.
+     * 
+     * @param {object} cfg {@link buildTexture#cfg}
+     * @returns {Texture}
+     * @author lijuhong 2025-02-20 创建该方法，用于构建纹理对象。
+     */
+    buildTexture(cfg) {
+        return buildTexture(this, cfg);
+    }
+
+    /**
+     * Creates a geometry.
+     * 
+     * @param {object} cfg {@link buildGeometry#cfg}
+     * @returns {Geometry}
+     * @author lijuhong 2025-2-20 创建该方法，用于构建几何体对象。
+     */
+    buildGeometry(cfg) {
+        return buildGeometry(this, cfg);
+    }
+
+    /**
+     * Creates an material.
+     * 
+     * @param {object} cfg {@link buildMaterial#cfg}
+     * @returns {Material}
+     * @author lijuhong 2025-2-20 创建该方法，用于构建材质对象。
+     */
+    buildMaterial(cfg) {
+        return buildMaterial(this, cfg);
+    }
+
+    /**
+     * Creates an emphasis material.
+     * 
+     * @param {object} cfg {@link buildEmphasisMaterial#cfg}
+     * @returns {EmphasisMaterial}
+     * @author lijuhong 2025-2-20 创建该方法，用于构建EmphasisMaterial对象。
+     */
+    buildEmphasisMaterial(cfg) {
+        return buildEmphasisMaterial(this, cfg);
+    }
+
+    /**
+     * Creates an edge material.
+     * 
+     * @param {object} cfg
+     * @returns {EmphasisMaterial} {@link buildEdgeMaterial#cfg}
+     * @author lijuhong 2025-2-20 创建该方法，用于构建EdgeMaterial对象。
+     */
+    buildEdgeMaterial(cfg) {
+        return buildEdgeMaterial(this, cfg);
+    }
+
+    /**
+     * Creates a mesh.
+     * 
+     * @param {object} cfg {@link buildMesh#cfg}
+     * @returns {Mesh}
+     * @author lijuhong 2025-02-20 添加该方法，用于构建Mesh对象。
+     */
+    buildMesh(cfg) {
+        return buildMesh(this, cfg);
+    }
+
+    /**
+     * Creates a sprite.
+     * 
+     * @param {object} cfg {@link SpriteMarker#constructor#cfg}
+     * @returns {SpriteMarker}
+     * @author lijuhong 2025-2-20 添加该方法，用于构建SpriteMarker对象。
+     */
+    buildSprite(cfg = {}) {
+        if (!cfg.id) cfg.id = "Node#" + math.createUUID();
+        return new SpriteMarker(this, cfg);
+    }
+
+    /**
+     * Creates a node.
+     * 
+     * @param {object} cfg {@link Node#constructor#cfg}
+     * @returns {Node}
+     * @author lijuhong 2025-2-20 添加该方法，用于构建Node对象。
+     */
+    buildNode(cfg = {}) {
+        if (!cfg.id) cfg.id = "Node#" + math.createUUID();
+        return new Node(this, cfg);
     }
 
     /**

@@ -1,5 +1,5 @@
 // @reviser lijuhong 修改 xeokit-sdk 导入路径，并添加导入对象。
-import { BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene, Annotation, AnnotationsPlugin, Texture, Material, EdgeMaterial, EmphasisMaterial, LambertMaterial, MetallicMaterial, PhongMaterial, SpecularMaterial, Geometry, ReadableGeometry, VBOGeometry, buildBoxGeometry, buildBoxLinesGeometry, buildBoxLinesGeometryFromAABB, buildCylinderGeometry, buildGridGeometry, buildLineGeometry, buildPlaneGeometry, buildPolylineGeometry, buildPolylineGeometryFromCurve, buildSphereGeometry, buildTorusGeometry, buildVectorTextGeometry, Mesh } from "../xeokit-sdk/dist/xeokit-sdk.es.js";
+import { BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene, AnnotationsPlugin, Annotation, Texture, Material, EdgeMaterial, EmphasisMaterial, Geometry, Mesh, SpriteMarker, Node } from "../xeokit-sdk/dist/xeokit-sdk.es.js";
 
 import { Controller } from "./Controller.js";
 import { BusyModal } from "./BusyModal.js";
@@ -173,193 +173,6 @@ function initTabs(containerElement) {
             })
         }
     }
-}
-
-/**
- * Remove an Annotation from Array
- * 
- * @param {string} id
- * @param {Array<Annotation>} clickShowLabelAnnotations
- * @param {Array<Annotation>} hoverShowLabelAnnotations
- * @author lijuhong 2025-2-18 创建该方法，用于从数组中移除Annotation对象
- */
-function removeAnnotation(id, clickShowLabelAnnotations, hoverShowLabelAnnotations) {
-    for (let i = 0; i < clickShowLabelAnnotations.length; i++) {
-        const element = clickShowLabelAnnotations[i];
-        if (element.id === id) {
-            clickShowLabelAnnotations.splice(i, 1);
-            break;
-        }
-    }
-    for (let i = 0; i < hoverShowLabelAnnotations.length; i++) {
-        const element = hoverShowLabelAnnotations[i];
-        if (element.id === id) {
-            hoverShowLabelAnnotations.splice(i, 1);
-            break;
-        }
-    }
-}
-
-/**
- * Creates a texture.
- * 
- * @param {Scene} scene 
- * @param {object} cfg
- * @returns {Texture}
- * @author lijuhong 2025-02-18 创建该方法，用于构建纹理对象。
- */
-function buildTexture(scene, cfg) {
-    if (cfg instanceof Texture)
-        return cfg;
-    return new Texture(scene, cfg);
-}
-
-/**
- * Create a geometry.
- * 
- * @param {Scene} scene
- * @param {object} cfg
- * @param {string} cfg.type
- * 
- * The available values are: 
- * * "box" - Create a box geometry.
- * * "boxLines" - Create a box lines geometry.
- * * "cylinder" - Create a cylinder geometry.
- * * "grid" - Create a grid geometry.
- * * "line" - Create a line geometry.
- * * "plane" - Create a plane geometry.
- * * "polyline" - Create a polyline geometry.
- * * "sphere" - Create a sphere geometry.
- * * "torus" - Create a torus geometry.
- * * "vectorText" - Create a vector text geometry.
- * * "readable" - Create a Readable geometry.
- * * "vbo" - Create a VBO geometry.
- * @returns {Geometry}
- * @author lijuhong 2025-2-18 创建该方法，用于构建几何体对象。
- */
-function buildGeometry(scene, cfg) {
-    if (cfg instanceof Geometry)
-        return cfg;
-    switch (cfg.type) {
-        case 'box':
-            return new ReadableGeometry(scene, buildBoxGeometry(cfg));
-        case 'boxLines':
-            if (cfg.aabb)
-                return new ReadableGeometry(scene, buildBoxLinesGeometryFromAABB(cfg));
-            else
-                return new ReadableGeometry(scene, buildBoxLinesGeometry(cfg));
-        case 'cylinder':
-            return new ReadableGeometry(scene, buildCylinderGeometry(cfg));
-        case 'grid':
-            return new ReadableGeometry(scene, buildGridGeometry(cfg));
-        case 'line':
-            return new ReadableGeometry(scene, buildLineGeometry(cfg));
-        case 'plane':
-            return new ReadableGeometry(scene, buildPlaneGeometry(cfg));
-        case 'polyline':
-            if (cfg.curve)
-                return new ReadableGeometry(scene, buildPolylineGeometryFromCurve(cfg));
-            else
-                return new ReadableGeometry(scene, buildPolylineGeometry(cfg));
-        case 'sphere':
-            return new ReadableGeometry(scene, buildSphereGeometry(cfg));
-        case 'torus':
-            return new ReadableGeometry(scene, buildTorusGeometry(cfg));
-        case 'vectorText':
-            return new ReadableGeometry(scene, buildVectorTextGeometry(cfg));
-        case 'vbo':
-            return new VBOGeometry(scene, cfg);
-        case 'readable':
-        default:
-            return new ReadableGeometry(scene, cfg);
-    }
-}
-
-/**
- * Create an material.
- * 
- * @param {Scene} scene
- * @param {object} cfg
- * @param {string} cfg.type
- * 
- * The available values are: 
- * * "edge" - Create an edge material.
- * * "emphasis" - Create an emphasis material.
- * * "lambert" - Create a lambert material.
- * * "metallic" - Create a metallic material.
- * * "phong" - Create a phong material.
- * * "specular" - Create a specular material.
- * @returns {Material}
- * @author lijuhong 2025-2-18 创建该方法，用于构建材质对象。
- */
-function buildMaterial(scene, cfg) {
-    if (cfg instanceof Material)
-        return cfg;
-    switch (cfg.type) {
-        case 'edge':
-            return new EdgeMaterial(scene, cfg);
-        case 'emphasis':
-            return new EmphasisMaterial(scene, cfg);
-        case 'lambert':
-            return new LambertMaterial(scene, cfg);
-        case 'metallic':
-            return new MetallicMaterial(scene, cfg);
-        case 'specular':
-            return new SpecularMaterial(scene, cfg);
-        case 'phong':
-        default:
-            return new PhongMaterial(scene, cfg);
-    }
-}
-
-/**
- * Create an emphasis material.
- * 
- * @param {Scene} scene
- * @param {object} cfg
- * @returns {EmphasisMaterial}
- * @author lijuhong 2025-2-19 创建该方法，用于构建EmphasisMaterial对象。
- */
-function buildEmphasisMaterial(scene, cfg) {
-    if (cfg instanceof EmphasisMaterial)
-        return cfg;
-    return new EmphasisMaterial(scene, cfg);
-}
-
-/**
- * Create an edge material.
- * 
- * @param {Scene} scene
- * @param {object} cfg
- * @returns {EmphasisMaterial}
- * @author lijuhong 2025-2-19 创建该方法，用于构建EdgeMaterial对象。
- */
-function buildEdgeMaterial(scene, cfg) {
-    if (cfg instanceof EdgeMaterial)
-        return cfg;
-    return new EdgeMaterial(scene, cfg);
-}
-
-/**
- * Create a mesh.
- * 
- * @param {Scene} scene
- * @param {object} cfg
- * @returns {Mesh}
- * @author lijuhong 2025-2-19 创建该方法，用于构建Mesh对象。
- */
-function buildMesh(scene, cfg) {
-    cfg.geometry = buildGeometry(scene, cfg.geometry);
-    cfg.material = buildMaterial(scene, cfg.material);
-    if (cfg.xrayMaterial)
-        cfg.xrayMaterial = buildEmphasisMaterial(scene, cfg.xrayMaterial);
-    if (cfg.highlightMaterial)
-        cfg.highlightMaterial = buildEmphasisMaterial(scene, cfg.highlightMaterial);
-    if (cfg.selectedMaterial)
-        cfg.selectedMaterial = buildEmphasisMaterial(scene, cfg.selectedMaterial);
-    if (cfg.edgeMaterial)
-        cfg.edgeMaterial = buildEdgeMaterial(scene, cfg.edgeMaterial);
-    return new Mesh(scene, cfg);
 }
 
 
@@ -724,7 +537,7 @@ class BIMViewer extends Controller {
             scaleCanvasResolutionFactor: 0.6
         });
 
-        // @reviser lijuhong 2025-2-18 初始化AnnotationsPlugin对象及相关变量。
+        // @reviser lijuhong 2025-2-18 初始化AnnotationsPlugin对象。
         const annotationsCfg = cfg.annotations || {};
         this._annotationsPlugin = new AnnotationsPlugin(viewer, {
             markerHTML: annotationsCfg.markerHTML || "<div class='xeokit-annotation-marker' style='background-color: {{markerBGColor}};'>{{glyph}}</div>",
@@ -739,23 +552,6 @@ class BIMViewer extends Controller {
                 title: "Untitled",
                 description: "No description"
             }
-        });
-        this._clickShowLabelAnnotations = [];
-        this._hoverShowLabelAnnotations = [];
-        this._annotationsPlugin.on("markerClicked", (annotation) => {
-            if (this._clickShowLabelAnnotations.indexOf(annotation) > -1)
-                annotation.setLabelShown(!annotation.getLabelShown());
-        });
-        this._annotationsPlugin.on("markerMouseEnter", (annotation) => {
-            if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
-                annotation.setLabelShown(true);
-        });
-        this._annotationsPlugin.on("markerMouseLeave", (annotation) => {
-            if (this._hoverShowLabelAnnotations.indexOf(annotation) > -1)
-                annotation.setLabelShown(false);
-        });
-        this._annotationsPlugin.on("annotationDestroyed", (id) => {
-            removeAnnotation(id, this._clickShowLabelAnnotations, this._hoverShowLabelAnnotations);
         });
 
         // this.viewer.scene.on("rendered", () => {
@@ -825,6 +621,16 @@ class BIMViewer extends Controller {
      */
     get cameraControl() {
         return this.viewer.cameraControl;
+    }
+
+    /**
+     * Returns the AnnotationsPlugin that was configured on this Viewer.
+     * 
+     * @returns {AnnotationsPlugin} The AnnotationsPlugin.
+     * @author lijuhong 2025-2-20 添加annotationsPlugin属性。
+    */
+    get annotationsPlugin() {
+        return this._annotationsPlugin;
     }
 
     _customizeViewer() {
@@ -2443,29 +2249,12 @@ class BIMViewer extends Controller {
     /**
      * Creates an Annotation to the scene.
      * 
-     * @param {object} params Annotation configuration.
-     * @param {string} params.labelShownMode Annotation label shown mode
-     * 
-     * The available values are: 
-     * * "always" - Always shown.
-     * * "clickShown" - Click on the marker to shown.
-     * * "hoverShown" - Hover on the marker to shown.
-     * * "never" - Never shown.
+     * @param {object} params {@link AnnotationsPlugin#createAnnotation#params}
      * @returns {Annotation} The new Annotation.
      * @author lijuhong 2025-02-18 添加该方法，用于创建Annotation对象。
      */
     createAnnotation(params) {
-        params.labelShown = params.labelShownMode === 'always' ? true : false;
-        const annotation = this._annotationsPlugin.createAnnotation(params);
-        switch (params.labelShownMode) {
-            case 'clickShown':
-                this._clickShowLabelAnnotations.push(annotation);
-                break;
-            case 'hoverShown':
-                this._hoverShowLabelAnnotations.push(annotation);
-                break;
-        }
-        return annotation;
+        return this._annotationsPlugin.createAnnotation(params);
     }
 
     /**
@@ -2481,101 +2270,89 @@ class BIMViewer extends Controller {
     /**
      * Creates a texture.
      * 
-     * @param {object} cfg
+     * @param {object} cfg {@link Scene#buildTexture#cfg}
      * @returns {Texture}
      * @author lijuhong 2025-02-18 创建该方法，用于构建纹理对象。
      */
     buildTexture(cfg) {
-        return buildTexture(this.scene, cfg);
+        return this.scene.buildTexture(cfg);
     }
 
     /**
-     * Create a geometry.
+     * Creates a geometry.
      * 
-     * @param {object} cfg
-     * @param {string} cfg.type
-     * 
-     * The available values are: 
-     * * "box" - Create a box geometry.
-     * * "boxLines" - Create a box lines geometry.
-     * * "cylinder" - Create a cylinder geometry.
-     * * "grid" - Create a grid geometry.
-     * * "line" - Create a line geometry.
-     * * "plane" - Create a plane geometry.
-     * * "polyline" - Create a polyline geometry.
-     * * "sphere" - Create a sphere geometry.
-     * * "torus" - Create a torus geometry.
-     * * "vectorText" - Create a vector text geometry.
-     * * "readable" - Create a Readable geometry.
-     * * "vbo" - Create a VBO geometry.
+     * @param {object} cfg {@link Scene#buildGeometry#cfg}
      * @returns {Geometry}
      * @author lijuhong 2025-2-18 创建该方法，用于构建几何体对象。
      */
     buildGeometry(cfg) {
-        return buildGeometry(this.scene, cfg);
+        return this.scene.buildGeometry(cfg);
     }
 
     /**
-     * Create an material.
+     * Creates an material.
      * 
-     * @param {object} cfg
-     * @param {string} cfg.type
-     * 
-     * The available values are: 
-     * * "edge" - Create an edge material.
-     * * "emphasis" - Create an emphasis material.
-     * * "lambert" - Create a lambert material.
-     * * "metallic" - Create a metallic material.
-     * * "phong" - Create a phong material.
-     * * "specular" - Create a specular material.
+     * @param {object} cfg {@link Scene#buildMaterial#cfg}
      * @returns {Material}
      * @author lijuhong 2025-2-18 创建该方法，用于构建材质对象。
      */
     buildMaterial(cfg) {
-        return buildMaterial(this.scene, cfg);
+        return this.scene.buildMaterial(cfg);
     }
 
     /**
-     * Create an emphasis material.
+     * Creates an emphasis material.
      * 
-     * @param {object} cfg
+     * @param {object} cfg {@link Scene#buildEmphasisMaterial#cfg}
      * @returns {EmphasisMaterial}
      * @author lijuhong 2025-2-19 创建该方法，用于构建EmphasisMaterial对象。
      */
     buildEmphasisMaterial(cfg) {
-        return buildEmphasisMaterial(this.scene, cfg);
+        return this.scene.buildEmphasisMaterial(cfg);
     }
 
     /**
-     * Create an edge material.
+     * Creates an edge material.
      * 
-     * @param {object} cfg
-     * @returns {EmphasisMaterial}
+     * @param {object} cfg {@link Scene#buildEdgeMaterial#cfg}
+     * @returns {EdgeMaterial}
      * @author lijuhong 2025-2-19 创建该方法，用于构建EdgeMaterial对象。
      */
     buildEdgeMaterial(cfg) {
-        return buildEdgeMaterial(this.scene, cfg);
+        return this.scene.buildEdgeMaterial(cfg);
     }
 
     /**
-     * Add a mesh to the scene.
+     * Creates a mesh.
      * 
-     * @param {object} cfg
+     * @param {object} cfg {@link Scene#buildMesh#cfg}
      * @returns {Mesh}
-     * @author lijuhong 2025-02-19 添加该方法，用于添加Mesh对象到场景中。
+     * @author lijuhong 2025-02-19 添加该方法，用于构建Mesh对象。
      */
-    addMesh(cfg) {
-        return buildMesh(this.scene, cfg);
+    buildMesh(cfg) {
+        return this.scene.buildMesh(cfg);
     }
 
     /**
-     * Removes a mesh from the scene.
+     * Creates a sprite to the scene.
      * 
-     * @param {Mesh} mesh The mesh to remove.
-     * @author lijuhong 2025-02-19 添加该方法，用于从场景中移除Mesh对象。
-    */
-    removeMesh(mesh) {
-        mesh.destroy();
+     * @param {object} cfg {@link Scene#buildSprite#cfg}
+     * @returns {SpriteMarker}
+     * @author lijuhong 2025-2-19 添加该方法，用于构建SpriteMarker对象。
+     */
+    buildSprite(cfg) {
+        return this.scene.buildSprite(cfg);
+    }
+
+    /**
+     * Creates a node.
+     * 
+     * @param {object} cfg {@link Scene#buildNode#cfg}
+     * @returns {Node}
+     * @author lijuhong 2025-2-20 添加该方法，用于构建Node对象。
+     */
+    buildNode(cfg) {
+        return this.scene.buildNode(cfg);
     }
 
     /**
@@ -2586,10 +2363,9 @@ class BIMViewer extends Controller {
         this._bcfViewpointsPlugin.destroy();
         this._canvasContextMenu.destroy();
         this._objectContextMenu.destroy();
-        // @reviser lijuhong 2025-2-18 添加annotations对象销毁方法
+        // @reviser lijuhong 2025-2-18 调用this._annotationsPlugin对象销毁方法
         this._annotationsPlugin.destroy();
     }
 }
 
-// @reviser lijuhong 添加buildTexture, buildGeometry, buildMaterial, buildEmphasisMaterial, buildEdgeMaterial, buildMesh导出方法
-export { BIMViewer, buildTexture, buildGeometry, buildMaterial, buildEmphasisMaterial, buildEdgeMaterial, buildMesh };
+export { BIMViewer };

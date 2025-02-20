@@ -3,6 +3,9 @@ import {Annotation} from "./Annotation.js";
 import {utils} from "../../viewer/scene/utils.js";
 import {math} from "../../viewer/scene/math/math.js";
 
+// @reviser lijuhong 2025-2-20 添加计数器，防止插件ID重复
+let count = 0;
+
 /**
  * {@link Viewer} plugin that creates {@link Annotation}s.
  *
@@ -381,8 +384,9 @@ class AnnotationsPlugin extends Plugin {
      * its {@link Entity} when we create the Annotation by supplying a {@link PickResult} to {@link AnnotationsPlugin#createAnnotation}.
      */
     constructor(viewer, cfg) {
-
-        super("Annotations", viewer);
+        // @reviser lijuhong 2025-2-20 添加计数器，防止插件ID重复
+        count++;
+        super(cfg.id || "Annotations#" + count, viewer);
 
         this._labelHTML = cfg.labelHTML || "<div></div>";
         this._markerHTML = cfg.markerHTML || "<div></div>";
@@ -396,6 +400,26 @@ class AnnotationsPlugin extends Plugin {
         this.annotations = {};
 
         this.surfaceOffset = cfg.surfaceOffset;
+
+        // @reviser lijuhong 2025-2-20 添加点击和鼠标悬停显示标签的逻辑
+        this._clickShowLabelAnnotations = {};
+        this._hoverShowLabelAnnotations = {};
+        this.on("markerClicked", (annotation) => {
+            if (this._clickShowLabelAnnotations[annotation.id])
+                annotation.setLabelShown(!annotation.getLabelShown());
+        });
+        this.on("markerMouseEnter", (annotation) => {
+            if (this._hoverShowLabelAnnotations[annotation.id])
+                annotation.setLabelShown(true);
+        });
+        this.on("markerMouseLeave", (annotation) => {
+            if (this._hoverShowLabelAnnotations[annotation.id])
+                annotation.setLabelShown(false);
+        });
+        this.on("annotationDestroyed", (id) => {
+            delete this._clickShowLabelAnnotations[id];
+            delete this._hoverShowLabelAnnotations[id];
+        });
     }
 
     /**
@@ -470,12 +494,26 @@ class AnnotationsPlugin extends Plugin {
      * @param {Number[]} [params.look] Optional World-space position for {@link Camera#look}, used when this Annotation is associated with a {@link Camera} position.
      * @param {Number[]} [params.up] Optional World-space position for {@link Camera#up}, used when this Annotation is associated with a {@link Camera} position.
      * @param {String} [params.projection] Optional projection type for {@link Camera#projection}, used when this Annotation is associated with a {@link Camera} position.
+     * @param {String} [params.labelShownMode] The {@link Annotation} label shown mode. 
+     * When using the labelShownMode, the labelShown value is sets automatically. 
+     * 
+     * The available values are: 
+     * * "always" - Always shown.
+     * * "clickShown" - Click on the marker to shown.
+     * * "hoverShown" - Hover on the marker to shown.
+     * * "never" - Never shown.
+     * #reviser lijuhong 2025-2-20 增加labelShownMode参数，用以控制label的显示模式。
      * @returns {Annotation} The new {@link Annotation}.
      */
     createAnnotation(params) {
+        // @reviser lijuhong 2025-2-20 增加对params.id的检查，如果未定义则自动生成
+        if (!params.id)
+            params.id = "Annotation#" + math.createUUID();
         if (this.viewer.scene.components[params.id]) {
             this.error("Viewer component with this ID already exists: " + params.id);
-            delete params.id;
+            // @reviser lijuhong 2025-2-20 注释掉这句，因为如果id重复，则直接返回，不创建新的annotation对象
+            // delete params.id;
+            return;
         }
 
         var markerElement = null;
@@ -493,6 +531,10 @@ class AnnotationsPlugin extends Plugin {
                 this.error("Can't find DOM element for 'labelElementId' value '" + params.labelElementId + "' - defaulting to internally-generated empty DIV");
             }
         }
+
+        // @reviser lijuhong 2025-2-20 配置了labelShownMode参数，根据labelShownMode的值自动设置labelShown的值
+        if (params.labelShownMode)
+            params.labelShown = (params.labelShownMode === "always") ? true : false;
 
         const annotation = new Annotation(this.viewer.scene, {
             id: params.id,
@@ -527,6 +569,16 @@ class AnnotationsPlugin extends Plugin {
             this.fire("annotationDestroyed", annotation.id);
         });
         this.fire("annotationCreated", annotation.id);
+
+        // @reviser lijuhong 2025-2-20 根据labelShownMode值将annotation对象添加至对应的数组中，以便后续根据labelShownMode值控制显示隐藏
+        switch (params.labelShownMode) {
+            case 'clickShown':
+                this._clickShowLabelAnnotations[annotation.id] = annotation;
+                break;
+            case 'hoverShown':
+                this._hoverShowLabelAnnotations[annotation.id] = annotation;
+                break;
+        }
         return annotation;
     }
 

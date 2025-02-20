@@ -64,7 +64,9 @@ class SpriteMarker extends Marker {
         super(owner, {
             entity: cfg.entity,
             occludable: cfg.occludable,
-            worldPos: cfg.worldPos
+            worldPos: cfg.worldPos,
+            // @reviser lijuhong 2025-2-20 修复未传递id参数给父类的问题
+            id: cfg.id
         });
 
         this._occluded = false;
