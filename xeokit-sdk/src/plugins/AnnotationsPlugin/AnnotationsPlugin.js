@@ -3,9 +3,6 @@ import {Annotation} from "./Annotation.js";
 import {utils} from "../../viewer/scene/utils.js";
 import {math} from "../../viewer/scene/math/math.js";
 
-// @reviser lijuhong 2025-2-20 添加计数器，防止插件ID重复
-let count = 0;
-
 /**
  * {@link Viewer} plugin that creates {@link Annotation}s.
  *
@@ -384,9 +381,8 @@ class AnnotationsPlugin extends Plugin {
      * its {@link Entity} when we create the Annotation by supplying a {@link PickResult} to {@link AnnotationsPlugin#createAnnotation}.
      */
     constructor(viewer, cfg) {
-        // @reviser lijuhong 2025-2-20 添加计数器，防止插件ID重复
-        count++;
-        super(cfg.id || "Annotations#" + count, viewer);
+        // @reviser lijuhong 2025-2-20 未配置id时自动生成
+        super(cfg.id || "Annotations#" + math.createUUID(), viewer);
 
         this._labelHTML = cfg.labelHTML || "<div></div>";
         this._markerHTML = cfg.markerHTML || "<div></div>";
