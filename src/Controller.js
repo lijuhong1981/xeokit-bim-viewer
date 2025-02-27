@@ -1,15 +1,31 @@
 import {Map} from "./Map.js";
+// @reviser lijuhong 2025-2-18 添加Server、Viewer对象的导入
+import { Server } from "./server/Server.js";
+import { Viewer } from "../xeokit-sdk/dist/xeokit-sdk.es.js";
 
 /** @private */
 class Controller {
 
     /**
+     * @constructor
+     * @param {*} parent
+     * @param {Object} cfg
+     * @param {Server} server
+     * @param {Viewer} viewer  
      * @protected
      */
     constructor(parent, cfg, server, viewer) {
 
         this.bimViewer = (parent ? (parent.bimViewer || parent) : this);
+        /**
+         * @type {Server}
+         * @reviser lijuhong 2025-2-26 添加注释说明，此处应为Server对象
+        */
         this.server = parent ? parent.server : server;
+        /**
+         * @type {Viewer}
+         * @reviser lijuhong 2025-2-26 添加注释说明，此处应为Viewer对象
+        */
         this.viewer = parent ? parent.viewer : viewer;
 
         this._children = [];

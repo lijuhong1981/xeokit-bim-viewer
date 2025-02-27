@@ -100,8 +100,6 @@
             });
         });
 
-        bimViewer.viewer.cameraControl.panRightClick = true; //开启右键平移
-
         bimViewer.setConfigs({
             "showSpaces": false, // Default
             "selectedGlowThrough": true,
@@ -151,10 +149,21 @@
                 bimViewer.openTab(tab);
             }
             watchHashParams();
-        },
-            (errorMsg) => {
-                console.error(errorMsg);
-            });
+        }, (errorMsg) => {
+            console.error(errorMsg);
+        });
+
+        bimViewer.cameraControl.on("picked", (e) => {
+            console.log("picked: ", e);
+            // const pickResult = bimViewer.scene.pick({
+            //     pickSurface: true,
+            //     canvasPos: e.canvasPos,
+            // });
+            // console.log("scene.pick: ", pickResult);
+        });
+        bimViewer.cameraControl.on("pickedSurface", (e) => {
+            console.log("pickedSurface: ", e);
+        });
 
         function watchHashParams() {
             let lastHash = "";

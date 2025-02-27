@@ -1,5 +1,5 @@
-// @reviser lijuhong 修改 xeokit-sdk 导入路径，并添加导入对象。
-import { BCFViewpointsPlugin, FastNavPlugin, math, stats, Viewer, Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene, AnnotationsPlugin, Annotation, Texture, Material, EdgeMaterial, EmphasisMaterial, Geometry, Mesh, SpriteMarker, Node } from "../xeokit-sdk/dist/xeokit-sdk.es.js";
+// @reviser lijuhong 2025-2-18 修改 xeokit-sdk 导入路径，并添加导入对象。
+import { BCFViewpointsPlugin, FastNavPlugin, math, stats, LocaleService, Viewer, Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene, AnnotationsPlugin, Annotation, Texture, Material, EdgeMaterial, EmphasisMaterial, Geometry, Mesh, SpriteMarker, Node } from "../xeokit-sdk/dist/xeokit-sdk.es.js";
 
 import { Controller } from "./Controller.js";
 import { BusyModal } from "./BusyModal.js";
@@ -27,9 +27,12 @@ import { ObjectsKdTree3 } from "./collision/ObjectsKdTree3.js";
 import { MarqueeSelectionTool } from "./toolbar/MarqueeSelectionTool.js";
 import { MeasureDistanceTool } from "./toolbar/MeasureDistanceTool.js";
 import { MeasureAngleTool } from "./toolbar/MeasureAngleTool.js";
-// @reviser lijuhong 注释掉从@xeokit/xeokit-sdk导入的对象。
+// @reviser lijuhong 2025-2-18 注释掉从@xeokit/xeokit-sdk导入的对象。
 // import { Camera, CameraControl, CameraFlightAnimation, MetaScene, Scene } from "@xeokit/xeokit-sdk";
-
+// @reviser lijuhong 2025-2-18 添加Server对象的导入
+import { Server } from "./server/Server.js";
+// @reviser lijuhong 2025-2-20 添加构建方法的导入
+import { buildTexture, buildMaterial, buildEmphasisMaterial, buildEdgeMaterial, buildGeometry, buildMesh } from "./builders/index.js";
 
 const hideEdgesMinDrawCount = 5; // FastNavPlugin enables dynamic edges when xeokit's per-frame draw count drops below this
 const scaleCanvasResolutionMinDrawCount = 1000; // FastNavPlugin switches to low-res canvas when xeokit's per-frame draw count rises above this
@@ -671,7 +674,7 @@ class BIMViewer extends Controller {
         scene.pointsMaterial.maxPerspectivePointSize = 4;
 
         // Camera control
-
+        // @reviser lijuhong 2025-2-27 开启右键平移
         this.viewer.cameraControl.panRightClick = false;
         this.viewer.cameraControl.followPointer = true;
         this.viewer.cameraControl.doublePickFlyTo = false;
@@ -688,6 +691,8 @@ class BIMViewer extends Controller {
         const cameraPivotElement = document.createRange().createContextualFragment("<div class='xeokit-camera-pivot-marker'></div>").firstChild;
         document.body.appendChild(cameraPivotElement);
         this.viewer.cameraControl.pivotElement = cameraPivotElement;
+        // @reviser lijuhong 2025-2-27 强制刷新画布大小，解决webgl画布大小不正确的问题
+        this.viewer.scene.canvas._canvasSizeChanged = true;
 
         scene.camera.perspective.near = 0.01;
         scene.camera.perspective.far = 3000.0;
@@ -2253,7 +2258,7 @@ class BIMViewer extends Controller {
      * @returns {Annotation} The new Annotation.
      * @author lijuhong 2025-02-18 添加该方法，用于创建Annotation对象。
      */
-    createAnnotation(params) {
+    addAnnotation(params) {
         return this._annotationsPlugin.createAnnotation(params);
     }
 
@@ -2263,96 +2268,98 @@ class BIMViewer extends Controller {
      * @param {string} id ID of Annotation to destroy.
      * @author lijuhong 2025-02-18 添加该方法，用于销毁Annotation对象。
      */
-    destroyAnnotation(id) {
+    removeAnnotation(id) {
         this._annotationsPlugin.destroyAnnotation(id);
     }
 
     /**
      * Creates a texture.
      * 
-     * @param {object} cfg {@link Scene#buildTexture#cfg}
+     * @param {object} cfg {@link buildTexture#cfg}
      * @returns {Texture}
      * @author lijuhong 2025-02-18 创建该方法，用于构建纹理对象。
      */
     buildTexture(cfg) {
-        return this.scene.buildTexture(cfg);
+        return buildTexture(this.scene, cfg);
     }
 
     /**
      * Creates a geometry.
      * 
-     * @param {object} cfg {@link Scene#buildGeometry#cfg}
+     * @param {object} cfg {@link buildGeometry#cfg}
      * @returns {Geometry}
      * @author lijuhong 2025-2-18 创建该方法，用于构建几何体对象。
      */
     buildGeometry(cfg) {
-        return this.scene.buildGeometry(cfg);
+        return buildGeometry(this.scene, cfg);
     }
 
     /**
      * Creates an material.
      * 
-     * @param {object} cfg {@link Scene#buildMaterial#cfg}
+     * @param {object} cfg {@link buildMaterial#cfg}
      * @returns {Material}
      * @author lijuhong 2025-2-18 创建该方法，用于构建材质对象。
      */
     buildMaterial(cfg) {
-        return this.scene.buildMaterial(cfg);
+        return buildMaterial(this.scene, cfg);
     }
 
     /**
      * Creates an emphasis material.
      * 
-     * @param {object} cfg {@link Scene#buildEmphasisMaterial#cfg}
+     * @param {object} cfg {@link buildEmphasisMaterial#cfg}
      * @returns {EmphasisMaterial}
      * @author lijuhong 2025-2-19 创建该方法，用于构建EmphasisMaterial对象。
      */
     buildEmphasisMaterial(cfg) {
-        return this.scene.buildEmphasisMaterial(cfg);
+        return buildEmphasisMaterial(this.scene, cfg);
     }
 
     /**
      * Creates an edge material.
      * 
-     * @param {object} cfg {@link Scene#buildEdgeMaterial#cfg}
+     * @param {object} cfg {@link buildEdgeMaterial#cfg}
      * @returns {EdgeMaterial}
      * @author lijuhong 2025-2-19 创建该方法，用于构建EdgeMaterial对象。
      */
     buildEdgeMaterial(cfg) {
-        return this.scene.buildEdgeMaterial(cfg);
+        return buildEdgeMaterial(this.scene, cfg);
     }
 
     /**
-     * Creates a mesh.
+     * Creates a mesh to the scene.
      * 
-     * @param {object} cfg {@link Scene#buildMesh#cfg}
+     * @param {object} cfg {@link buildMesh#cfg}
      * @returns {Mesh}
      * @author lijuhong 2025-02-19 添加该方法，用于构建Mesh对象。
      */
-    buildMesh(cfg) {
-        return this.scene.buildMesh(cfg);
+    addMesh(cfg) {
+        return buildMesh(this.scene, cfg);
     }
 
     /**
      * Creates a sprite to the scene.
      * 
-     * @param {object} cfg {@link Scene#buildSprite#cfg}
+     * @param {object} cfg {@link SpriteMarker#constructor#cfg}
      * @returns {SpriteMarker}
      * @author lijuhong 2025-2-19 添加该方法，用于构建SpriteMarker对象。
      */
-    buildSprite(cfg) {
-        return this.scene.buildSprite(cfg);
+    addSprite(cfg) {
+        if (!cfg.id) cfg.id = "Sprite#" + math.createUUID();
+        return new SpriteMarker(this.scene, cfg);
     }
 
     /**
-     * Creates a node.
+     * Creates a node to the scene.
      * 
-     * @param {object} cfg {@link Scene#buildNode#cfg}
+     * @param {object} cfg {@link Node#constructor#cfg}
      * @returns {Node}
      * @author lijuhong 2025-2-20 添加该方法，用于构建Node对象。
      */
-    buildNode(cfg) {
-        return this.scene.buildNode(cfg);
+    addNode(cfg) {
+        if (!cfg.id) cfg.id = "Node#" + math.createUUID();
+        return new Node(this.scene, cfg);
     }
 
     /**
@@ -2363,8 +2370,6 @@ class BIMViewer extends Controller {
         this._bcfViewpointsPlugin.destroy();
         this._canvasContextMenu.destroy();
         this._objectContextMenu.destroy();
-        // @reviser lijuhong 2025-2-18 调用this._annotationsPlugin对象销毁方法
-        this._annotationsPlugin.destroy();
     }
 }
 
